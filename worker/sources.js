@@ -82,6 +82,11 @@ export function readSnapshot(env, name) {
   return env.PANEL_KV.get(`${name}:snapshot`, 'json');
 }
 
+// 原样转发整份快照时不解析：几百 KB 的 JSON 解析再序列化会吃掉大半 CPU 预算。
+export function readSnapshotStream(env, name) {
+  return env.PANEL_KV.getWithMetadata(`${name}:snapshot`, 'stream');
+}
+
 export function readHealthPublic(env) {
   return env.PANEL_KV.get('health:public', 'json');
 }

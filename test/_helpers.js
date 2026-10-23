@@ -9,6 +9,12 @@ export function memoryKv() {
       if (entry === undefined) return null;
       return type === 'json' ? JSON.parse(entry.value) : entry.value;
     },
+    async getWithMetadata(key, type) {
+      const entry = store.get(key);
+      if (entry === undefined) return { value: null, metadata: null };
+      const value = type === 'stream' ? new Response(entry.value).body : await this.get(key, type);
+      return { value, metadata: entry.metadata };
+    },
     async put(key, value, options = {}) {
       this.writes++;
       store.set(key, { value, metadata: options.metadata ?? null });

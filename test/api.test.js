@@ -43,8 +43,9 @@ afterEach(() => {
 async function makeEnv() {
   const kv = memoryKv();
   await kv.put('health:public', JSON.stringify({ as_of: '2026-03-09', sleep_hours_avg7: 7 }));
-  await kv.put('health:snapshot', JSON.stringify(healthSnapshot()));
-  await kv.put('ledger:snapshot', JSON.stringify(ledgerSnapshot()));
+  for (const [name, snapshot] of [['health', healthSnapshot()], ['ledger', ledgerSnapshot()]]) {
+    await kv.put(`${name}:snapshot`, JSON.stringify(snapshot), { metadata: { generated_at: snapshot.generated_at } });
+  }
   return {
     PANEL_KV: kv,
     SESSION_SECRET: 'secret',
@@ -118,6 +119,22 @@ test('private routes need a session and never get CORS headers', async () => {
   assert.equal(body.data.now.active_app, 'Secret');
   assert.equal(body.data.health.metrics[0].key, 'steps');
   assert.equal((await api(request('/api/v1/me/ledger', { method: 'OPTIONS' }), env)).status, 405);
+});
+
+test('private snapshots are passed through unparsed with their generation time', async () => {
+  const env = await makeEnv();
+  const response = await api(request('/api/v1/me/health', { headers: await signedIn() }), env);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('Cache-Control'), 'no-store');
+  assert.equal(response.headers.get('Access-Control-Allow-Origin'), null);
+  const body = await response.json();
+  assert.deepEqual(body.data, JSON.parse(env.PANEL_KV.store.get('health:snapshot').value));
+  assert.equal(body.updated_at, body.data.generated_at);
+  assert.equal(body.source, 'health');
+  const empty = { ...env, PANEL_KV: memoryKv() };
+  const missing = await api(request('/api/v1/me/ledger', { headers: await signedIn() }), empty);
+  assert.equal(missing.status, 503);
+  assert.equal((await missing.json()).error.code, 'not_ready');
 });
 
 test('unknown routes and write methods are rejected', async () => {

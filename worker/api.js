@@ -13,6 +13,7 @@ import {
   publicMacStatus,
   readHealthPublic,
   readSnapshot,
+  readSnapshotStream,
   solutionPath,
   solutionRawUrl,
   solutionsIndexResponse,
@@ -200,14 +201,18 @@ async function meNow({ env }) {
   return ok(status, { updatedAt: status.updated_at ?? null, source: 'macflare' });
 }
 
-async function meHealth({ env }) {
-  const snapshot = await readSnapshot(env, 'health');
-  if (!snapshot) throw new HttpError(503, 'not_ready', '健康数据还没有推送过来');
-  return ok(snapshot, { updatedAt: snapshot.generated_at ?? null, source: 'health' });
+async function snapshotRoute(env, name, label) {
+  const { value, metadata } = await readSnapshotStream(env, name);
+  if (!value) throw new HttpError(503, 'not_ready', `${label}数据还没有推送过来`);
+  return new Response(envelopeStream(value, metadata?.generated_at ?? null, name), {
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': cacheControl(0) },
+  });
 }
 
-async function meLedger({ env }) {
-  const snapshot = await readSnapshot(env, 'ledger');
-  if (!snapshot) throw new HttpError(503, 'not_ready', '记账数据还没有推送过来');
-  return ok(snapshot, { updatedAt: snapshot.generated_at ?? null, source: 'ledger' });
+function meHealth({ env }) {
+  return snapshotRoute(env, 'health', '健康');
+}
+
+function meLedger({ env }) {
+  return snapshotRoute(env, 'ledger', '记账');
 }
