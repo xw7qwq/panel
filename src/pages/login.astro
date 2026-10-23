@@ -1,0 +1,8 @@
+---
+import LoginForm from '../components/LoginForm.svelte';
+import Panel from '../layouts/Panel.astro';
+---
+
+<Panel title="登录" section="login" private>
+  <LoginForm client:load />
+</Panel>

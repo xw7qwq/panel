@@ -1,0 +1,8 @@
+---
+import HealthView from '../../components/HealthView.svelte';
+import Panel from '../../layouts/Panel.astro';
+---
+
+<Panel title="健康 · 详细" section="health" private>
+  <HealthView client:load />
+</Panel>

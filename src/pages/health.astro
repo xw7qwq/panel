@@ -1,0 +1,8 @@
+---
+import HealthPublic from '../components/HealthPublic.svelte';
+import Panel from '../layouts/Panel.astro';
+---
+
+<Panel title="健康" description="手环数据的公开摘要：最近 7 天的平均睡眠和步数。" section="health">
+  <HealthPublic client:load />
+</Panel>

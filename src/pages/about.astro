@@ -1,0 +1,142 @@
+---
+import Panel from '../layouts/Panel.astro';
+import { ROUTES } from '../../worker/api.js';
+import { TOOLS } from '../../worker/tools.js';
+
+// 接口和 MCP 工具列表直接取自 Worker 的定义，文档不会和实现对不上。
+const origin = Astro.site?.origin ?? 'https://lucius7.dev';
+const routes = ROUTES.filter((route) => route.public);
+const privateRoutes = ROUTES.filter((route) => !route.public);
+const SOURCES = [
+  { section: '刷题', repo: 'oj', how: 'GitHub Actions 每天抓取各平台的提交记录' },
+  { section: '题解', repo: 'solutions', how: '写完题提交到仓库，每天重建索引' },
+  { section: '此刻', repo: 'macflare', how: 'Mac 上的小程序定时上报' },
+  { section: '健康', repo: 'health', how: '服务器同步手环数据后推送到面板' },
+  { section: '记账', repo: 'ledger', how: '服务器上的 beancount 账本每天推送汇总' },
+];
+---
+
+<Panel title="关于与接口" description="面板公开了哪些数据、数据从哪来，以及公开接口和 MCP 的用法。" section="about">
+  <article class="about">
+    <header class="page-head">
+      <div>
+        <h1>关于这个面板</h1>
+        <p>把散在各处的个人数据放到一起：刷题、题解、Mac 此刻的状态、健康和记账。文章写在<a href="https://blog.lucius7.cn/">博客</a>。</p>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2>公开和私有</h2>
+      <ul>
+        <li><strong>公开</strong>：刷题统计和题解、Mac 在不在线和正在听的歌、最近 7 天的平均睡眠和步数（不含当天）。</li>
+        <li><strong>只有自己</strong>：健康明细、记账、Mac 的前台应用和电量。页面和接口都在 <code>/me/</code> 下，需要登录。</li>
+        <li>本站只在登录后设置一个登录 Cookie，主题偏好存在浏览器本地；没有统计和广告脚本。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>数据从哪来</h2>
+      <div class="scroll-x">
+        <table class="xw7-table">
+          <thead><tr><th>栏目</th><th>仓库</th><th>更新方式</th></tr></thead>
+          <tbody>
+            {SOURCES.map((item) => (
+              <tr>
+                <td>{item.section}</td>
+                <td><a href={`https://github.com/xw7qwq/${item.repo}`}>xw7qwq/{item.repo}</a></td>
+                <td>{item.how}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>公开接口</h2>
+      <p>
+        地址前缀 <code>{origin}/api/v1</code>，只支持 GET，允许跨域读取。成功时返回
+        <code>{'{ data, updated_at, source }'}</code>，出错时返回 <code>{'{ error: { code, message } }'}</code>。
+      </p>
+      <div class="scroll-x">
+        <table class="xw7-table">
+          <thead><tr><th>路径</th><th>内容</th></tr></thead>
+          <tbody>
+            {routes.map((route) => (
+              <tr>
+                <td><code>{route.path}</code></td>
+                <td>{route.describe}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="xw7-faint small">登录后可用：{privateRoutes.map((route) => route.path).join('、')}。</p>
+    </section>
+
+    <section class="section">
+      <h2>给 AI 用：MCP</h2>
+      <p>
+        MCP 地址是 <code>{origin}/mcp</code>（Streamable HTTP）。在 Claude 等应用里添加自定义连接器，第一次连接会跳到面板登录并确认授权，授权 30 天有效，可以在「我的」页面撤销。所有工具都是只读的：
+      </p>
+      <ul class="tools">
+        {TOOLS.map((tool) => (
+          <li>
+            <code>{tool.name}</code>
+            <span class="title">{tool.title}</span>
+            <p class="xw7-muted">{tool.description}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </article>
+</Panel>
+
+<style>
+  .about {
+    max-width: 860px;
+  }
+
+  .section ul {
+    display: grid;
+    gap: var(--space-2);
+    padding-left: 1.2em;
+  }
+
+  .section p {
+    margin-bottom: var(--space-3);
+  }
+
+  code {
+    padding: 0 0.3em;
+    border-radius: var(--radius-1);
+    background: var(--surface-2);
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+  }
+
+  .small {
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+  }
+
+  .tools {
+    list-style: none;
+    padding-left: 0 !important;
+  }
+
+  .tools li {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tools .title {
+    margin-left: var(--space-2);
+    font-weight: 600;
+  }
+
+  .tools p {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-sm);
+  }
+</style>

@@ -1,0 +1,42 @@
+{
+  "name": "panel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "xw7 面板：刷题、状态、健康、记账汇总在 lucius7.dev，附带统一的只读 API 和 MCP。",
+  "license": "MIT",
+  "author": "Lucius7",
+  "homepage": "https://lucius7.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xw7qwq/panel.git"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro build && wrangler dev",
+    "test": "node --test \"test/*.test.js\"",
+    "check": "node --test \"test/*.test.js\" && astro build",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "1.2.4",
+    "@xw7/ui": "link:../ui"
+  },
+  "devDependencies": {
+    "@astrojs/svelte": "9.1.1",
+    "astro": "7.4.2",
+    "svelte": "5.57.2",
+    "wrangler": "4.152.0"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
+  }
+}

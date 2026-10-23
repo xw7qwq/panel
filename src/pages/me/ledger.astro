@@ -1,0 +1,8 @@
+---
+import LedgerView from '../../components/LedgerView.svelte';
+import Panel from '../../layouts/Panel.astro';
+---
+
+<Panel title="记账" section="ledger" private>
+  <LedgerView client:load />
+</Panel>

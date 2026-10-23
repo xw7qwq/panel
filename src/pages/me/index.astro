@@ -1,0 +1,8 @@
+---
+import MeView from '../../components/MeView.svelte';
+import Panel from '../../layouts/Panel.astro';
+---
+
+<Panel title="我的" section="me" private>
+  <MeView client:load />
+</Panel>

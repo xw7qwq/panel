@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /me/
+Disallow: /api/
+Disallow: /authorize
+Disallow: /login/

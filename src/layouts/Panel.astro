@@ -1,0 +1,44 @@
+---
+import '@xw7/ui/tokens.css';
+import '@xw7/ui/base.css';
+import '../styles/panel.css';
+import Footer from '@xw7/ui/components/Footer.svelte';
+import TopBar from '@xw7/ui/components/TopBar.svelte';
+import { themeScript } from '@xw7/ui/theme';
+
+interface Props {
+  title?: string;
+  description?: string;
+  section?: string;
+  private?: boolean;
+}
+
+const { title, description = 'Lucius7 的面板：刷题、状态、健康和记账汇总。', section = 'home', private: isPrivate = false } = Astro.props;
+const fullTitle = title ? `${title} · xw7` : 'xw7 · Lucius7 的面板';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {isPrivate ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />}
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#fbf6f9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d0b10" media="(prefers-color-scheme: dark)" />
+    <script is:inline set:html={themeScript} />
+  </head>
+  <body>
+    <TopBar client:load current={section} />
+    <main id="main" class="xw7-container page">
+      <slot />
+    </main>
+    <Footer>
+      <a href="/about/">关于与接口</a>
+    </Footer>
+  </body>
+</html>

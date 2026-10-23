@@ -1,0 +1,8 @@
+---
+import NowView from '../components/NowView.svelte';
+import Panel from '../layouts/Panel.astro';
+---
+
+<Panel title="此刻" description="Lucius7 的 Mac 此刻在不在线、在听什么歌。" section="now">
+  <NowView client:load />
+</Panel>

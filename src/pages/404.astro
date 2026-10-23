@@ -1,0 +1,35 @@
+---
+import Panel from '../layouts/Panel.astro';
+---
+
+<Panel title="页面不存在" section="none" private>
+  <div class="missing">
+    <p class="code xw7-num">404</p>
+    <h1>这里什么都没有</h1>
+    <p class="xw7-muted">链接可能写错了，或者页面已经搬走。</p>
+    <p class="links"><a href="/">回到首页</a> · <a href="https://blog.lucius7.cn/">去博客</a></p>
+  </div>
+</Panel>
+
+<style>
+  .missing {
+    max-width: 480px;
+    margin: var(--space-8) auto;
+    text-align: center;
+  }
+
+  .code {
+    color: var(--accent);
+    font-size: var(--text-3xl);
+    font-weight: 700;
+  }
+
+  h1 {
+    margin: var(--space-2) 0;
+    font-size: var(--text-xl);
+  }
+
+  .links {
+    margin-top: var(--space-4);
+  }
+</style>
