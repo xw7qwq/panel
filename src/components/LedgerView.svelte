@@ -91,7 +91,7 @@
   <div>
     <h1>记账</h1>
     <p>
-      {#if snapshot}截至 {snapshot.as_of ?? '—'} · 金额折算为 {currency}{#if snapshot.generated_at} · 推送于 {formatDate(snapshot.generated_at, true)}{/if}{:else}仅自己可见{/if}
+      {#if snapshot}截至 {snapshot.as_of ?? '—'} · 金额折算为 {currency}{#if snapshot.generated_at}{` · 推送于 ${formatDate(snapshot.generated_at, true)}`}{/if}{:else}仅自己可见{/if}
     </p>
   </div>
   <div class="toolbar">

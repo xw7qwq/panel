@@ -43,7 +43,7 @@
           <Stat label="平均步数" value={formatNumber(data.steps_avg7)} unit="步" size="lg" />
         </div>
         <p class="xw7-faint note">
-          {data.days_with_data} / {data.window_days} 天有记录{#if data.generated_at} · 数据生成于 {formatDate(data.generated_at, true)}{/if}
+          {data.days_with_data} / {data.window_days} 天有记录{#if data.generated_at}{` · 数据生成于 ${formatDate(data.generated_at, true)}`}{/if}
         </p>
       {/if}
     </Card>
