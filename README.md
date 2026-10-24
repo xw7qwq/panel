@@ -13,7 +13,7 @@ xw7 的面板，部署在 [lucius7.dev](https://lucius7.dev/)：刷题、题解�
 | `/oj/code/` | 题解搜索和源码阅读 | 所有人 |
 | `/now/` | Mac 在不在线、正在听的歌；登录后多出前台应用、电量和负载 | 所有人 |
 | `/health/` | 截至昨天的 7 天平均睡眠和步数 | 所有人 |
-| `/me/` | 本月收支、健康指标、MCP 连接和授权管理 | 仅自己 |
+| `/me/` | 本月收支、健康指标、MCP 连接和授权管理、通行密钥 | 仅自己 |
 | `/me/health/` | 健康指标卡、趋势图、最近的睡眠 | 仅自己 |
 | `/me/ledger/` | 收支、净资产、支出构成、余额、交易 | 仅自己 |
 | `/about/` | 公开范围、数据来源、接口和 MCP 工具列表 | 所有人 |
@@ -52,7 +52,14 @@ OAuth 由 [`@cloudflare/workers-oauth-provider`](https://github.com/cloudflare/w
 
 ## 登录
 
-只有一个口令（`OWNER_PASSPHRASE`）。通过后发一张 HMAC 签名的 `__Host-` Cookie，30 天有效；换掉 `SESSION_SECRET` 会让所有设备立即退出。登录按 IP 限速，每分钟 5 次。
+有两种方式，通过后都发同一张 HMAC 签名的 `__Host-` Cookie，30 天有效；换掉 `SESSION_SECRET` 会让所有设备立即退出。登录按 IP 限速，每分钟 5 次。
+
+- **通行密钥（passkey）**：在 `/me/` 添加。之后在登录页点「使用通行密钥登录」，或者在口令框的自动填充里选它，用指纹、面容或设备密码确认。通行密钥绑定 `PASSKEY_RP_ID`（`lucius7.dev`），所以在 `panel.lucius7.dev` 添加的通行密钥切到主域名后照样能用。
+- **口令**（`OWNER_PASSPHRASE`）：第一次添加通行密钥要先用它登录，之后留作备用。只想用通行密钥时运行 `npx wrangler secret delete OWNER_PASSPHRASE`；通行密钥全丢了，再用 `npx wrangler secret put OWNER_PASSPHRASE` 设回来。
+
+添加或删除通行密钥要求最近 15 分钟内登录过，否则先到 `/login/?reauth=1` 重新验证一次；口令关闭时，最后一把通行密钥不能删。
+
+服务端只存公钥（`PANEL_KV` 的 `auth:passkeys`），一次性的 challenge 放在签名的短期 Cookie 里，登录页的接口不写 KV。校验按 WebAuthn 规范写在 `worker/webauthn.js`：只认本站 origin 和 `PASSKEY_RP_ID`，要求用户验证，支持 ES256、Ed25519 和 RS256，不验证证明（attestation）。没有用现成的服务端库，因为它连带几百 KB 的 ASN.1/X.509 代码，冷启动就超过免费版每次请求 10 ms 的 CPU 限额；浏览器端用 [`@simplewebauthn/browser`](https://simplewebauthn.dev/)。
 
 ## 部署
 
@@ -84,7 +91,7 @@ pnpm dev        # 只看页面，接口不可用
 pnpm preview    # 构建后用 wrangler dev 跑完整的 Worker
 ```
 
-`pnpm preview` 需要在仓库根目录放一个 `.dev.vars`（已被 git 忽略），写上四个 secret 的本地值。
+`pnpm preview` 需要在仓库根目录放一个 `.dev.vars`（已被 git 忽略），写上四个 secret 的本地值。本地试通行密钥时再加上 `SITE_ORIGIN=http://localhost:8787` 和 `PASSKEY_RP_ID=localhost`。
 
 ## 目录结构
 
@@ -100,7 +107,10 @@ worker/
   api.js        /api/v1 路由
   mcp.js        MCP 协议处理
   tools.js      MCP 工具
-  auth.js  consent.js  ingest.js  sources.js
+  auth.js       口令登录和会话
+  passkey.js    通行密钥的登录和管理接口
+  webauthn.js   WebAuthn 校验
+  consent.js  ingest.js  sources.js
   health.js  ledger.js  oj.js  http.js
 test/           Worker 的单元测试（node --test）
 public/         favicon、robots.txt、安全响应头

@@ -86,6 +86,11 @@ test('login rejects wrong passphrases, cross-site posts and rate-limited clients
 
   const unconfigured = await login(form({ passphrase: 'x' }), {});
   assert.equal(unconfigured.status, 503);
+
+  // 删掉 OWNER_PASSPHRASE 以后只能用通行密钥。
+  const disabled = await login(form({ passphrase: 'correct horse', next: '/me/' }), { SESSION_SECRET: SECRET });
+  assert.equal(disabled.headers.get('Location'), '/login/?error=disabled&next=%2Fme%2F');
+  assert.equal(disabled.headers.getSetCookie().length, 0);
 });
 
 test('logout needs a same-origin POST and clears the cookies', async () => {

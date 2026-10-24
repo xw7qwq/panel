@@ -1,20 +1,21 @@
 import { HttpError, clientIp, fail, readBody, redirect, sameOrigin } from './http.js';
 
-// 登录只有一个口令（Worker secret OWNER_PASSPHRASE）。通过后发一张 HMAC 签名的会话 Cookie，30 天有效；
+// 登录用口令（Worker secret OWNER_PASSPHRASE）或通行密钥（passkey.js）。两种方式都发同一张 HMAC 签名的会话 Cookie，30 天有效；
 // 换掉 SESSION_SECRET 会让所有设备上的登录立即失效。另有一个不带 HttpOnly 的提示 Cookie，只给界面判断显示什么。
+// 删掉 OWNER_PASSPHRASE 就只能用通行密钥登录。
 export const SESSION_COOKIE = '__Host-xw7_session';
 export const HINT_COOKIE = 'xw7_signed_in';
 export const SESSION_SECONDS = 30 * 86400;
 
 const encoder = new TextEncoder();
 
-function base64url(bytes) {
+export function base64url(bytes) {
   let binary = '';
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function fromBase64url(text) {
+export function fromBase64url(text) {
   const binary = atob(text.replace(/-/g, '+').replace(/_/g, '/'));
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 }
@@ -108,7 +109,7 @@ function loginRedirect(error, next) {
 
 export async function login(request, env) {
   if (!sameOrigin(request)) return fail(403, 'cross_origin', '只接受本站表单提交的登录');
-  if (!env.OWNER_PASSPHRASE || !env.SESSION_SECRET) return fail(503, 'auth_not_configured', '登录口令还没有配置');
+  if (!env.SESSION_SECRET) return fail(503, 'auth_not_configured', '登录还没有配置');
   let body;
   try {
     body = await readBody(request, 4096);
@@ -117,6 +118,7 @@ export async function login(request, env) {
     throw error;
   }
   const next = safeNext(body.next);
+  if (!env.OWNER_PASSPHRASE) return loginRedirect('disabled', next);
   if (env.LOGIN_LIMITER) {
     const { success } = await env.LOGIN_LIMITER.limit({ key: `login:${clientIp(request)}` });
     if (!success) return loginRedirect('rate', next);

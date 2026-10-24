@@ -1,8 +1,9 @@
 // 浏览器端读 /api/v1。401 时默认跳去登录（login: false 时只抛错），其余错误抛出带中文说明的 Error。
 export class ApiError extends Error {
-  constructor(status, message) {
+  constructor(status, message, code = null) {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -20,6 +21,24 @@ export async function getJson(path, { signal, login = true } = {}) {
   }
   if (!response.ok) throw new ApiError(response.status, body?.error?.message || `请求失败（HTTP ${response.status}）`);
   return body;
+}
+
+// 写请求（登录、通行密钥管理）：发 JSON，出错时抛出带错误码的 ApiError，不自动跳转。
+export async function sendJson(path, { method = 'POST', body } = {}) {
+  const response = await fetch(path, {
+    method,
+    headers: body === undefined ? { Accept: 'application/json' } : { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    credentials: 'same-origin',
+  });
+  let result = null;
+  try {
+    result = await response.json();
+  } catch {
+    // 非 JSON 响应按状态码报错。
+  }
+  if (!response.ok) throw new ApiError(response.status, result?.error?.message || `请求失败（HTTP ${response.status}）`, result?.error?.code ?? null);
+  return result;
 }
 
 export async function getText(path, { signal } = {}) {

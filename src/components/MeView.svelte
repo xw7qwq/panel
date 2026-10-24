@@ -5,7 +5,8 @@
   import Skeleton from '@xw7/ui/components/Skeleton.svelte';
   import Stat from '@xw7/ui/components/Stat.svelte';
   import { formatDate, formatMoney, formatNumber, formatPercent } from '@xw7/ui/format';
-  import { getJson } from '../lib/api.js';
+  import { ApiError, getJson } from '../lib/api.js';
+  import { addPasskey, passkeyError, passkeySupported, removePasskey } from '../lib/passkey.js';
   import NowCard from './NowCard.svelte';
 
   const KEY_METRICS = ['sleep_hours', 'steps', 'hrv', 'rhr'];
@@ -17,6 +18,10 @@
   let origin = $state('https://lucius7.dev');
   let copied = $state(false);
   let now = $state(Date.now());
+  let passkeys = $state.raw(null);
+  let passkeyMessage = $state('');
+  let passkeyTask = $state('');
+  let passkeyCapable = $state(true);
 
   onMount(() => {
     origin = location.origin;
@@ -25,7 +30,35 @@
       (reason) => (error = reason.message),
     );
     loadGrants();
+    passkeyCapable = passkeySupported();
+    loadPasskeys();
   });
+
+  async function loadPasskeys() {
+    try {
+      passkeys = (await getJson('/api/v1/me/passkeys')).data;
+    } catch (reason) {
+      passkeyMessage = reason.message;
+    }
+  }
+
+  // 添加和删除都要求最近验证过；过期时服务端返回 reauth_required，重新加载后界面会提示去重新验证。
+  async function managePasskeys(task, run) {
+    passkeyTask = task;
+    passkeyMessage = '';
+    try {
+      await run();
+    } catch (reason) {
+      if (!(reason instanceof ApiError && reason.code === 'reauth_required')) passkeyMessage = passkeyError(reason);
+    }
+    passkeyTask = '';
+    await loadPasskeys();
+  }
+
+  function removeItem(item) {
+    if (!confirm(`删除通行密钥「${item.name}」？删除后它不能再登录面板。`)) return;
+    managePasskeys('remove', () => removePasskey(item.id, passkeys.rp_id));
+  }
 
   async function loadGrants() {
     try {
@@ -138,6 +171,46 @@
       </ul>
     {/if}
   </Card>
+
+  <Card title="登录与通行密钥" subtitle="用指纹、面容或设备密码登录，不用输口令">
+    {#if passkeyMessage}<div class="notice"><Notice tone="bad">{passkeyMessage}</Notice></div>{/if}
+    {#if !passkeys}
+      {#if !passkeyMessage}<Skeleton lines={2} />{/if}
+    {:else}
+      {#if !passkeys.items.length}
+        <p class="xw7-muted">还没有通行密钥。添加以后，登录页可以直接用它登录。</p>
+      {:else}
+        <ul class="row-list">
+          {#each passkeys.items as item (item.id)}
+            <li>
+              <div class="grow">
+                <div class="ellipsis">{item.name}{#if item.synced}&nbsp;<span class="badge">已同步</span>{/if}</div>
+                <div class="xw7-faint small">添加于 {formatDate(item.created_at, true)} · {item.last_used_at ? `上次使用 ${formatDate(item.last_used_at, true)}` : '还没用过'}</div>
+              </div>
+              <button type="button" class="xw7-button" onclick={() => removeItem(item)} disabled={Boolean(passkeyTask) || !passkeys.can_manage}>删除</button>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+      <div class="actions">
+        <button
+          type="button"
+          class="xw7-button xw7-button--primary"
+          onclick={() => managePasskeys('add', addPasskey)}
+          disabled={Boolean(passkeyTask) || !passkeys.can_manage || !passkeyCapable}
+        >
+          {passkeyTask === 'add' ? '请在弹窗里确认…' : '添加通行密钥'}
+        </button>
+        {#if !passkeys.can_manage}<a href="/login/?reauth=1&next=%2Fme%2F">重新验证后才能添加或删除</a>{/if}
+      </div>
+      {#if !passkeyCapable}<p class="xw7-faint small">这个浏览器不支持通行密钥。</p>{/if}
+      {#if !passkeys.passphrase}
+        <p class="xw7-faint small">口令登录已关闭。通行密钥全部丢失时，在 Mac 的 panel 目录运行 <code>npx wrangler secret put OWNER_PASSPHRASE</code> 重新设一个口令。</p>
+      {:else if passkeys.items.length}
+        <p class="xw7-faint small">口令登录仍然可用，作为备用。只想用通行密钥的话，在 Mac 的 panel 目录运行 <code>npx wrangler secret delete OWNER_PASSPHRASE</code>。</p>
+      {/if}
+    {/if}
+  </Card>
 </div>
 
 <style>
@@ -162,6 +235,19 @@
 
   .small {
     font-size: var(--text-xs);
+  }
+
+  .notice {
+    margin-bottom: var(--space-3);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    margin: var(--space-3) 0;
+    font-size: var(--text-sm);
   }
 
   .minor {
