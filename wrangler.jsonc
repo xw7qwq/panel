@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "panel",
+  "account_id": "382b1f1823ef6c31404f27bf535161a4",
   "main": "worker/index.js",
   "compatibility_date": "2026-10-20",
   // CIMD 客户端元数据只能从公网取；同区域的 Worker 也走公网路径，能正常访问 macflare 等子域名。
@@ -17,10 +18,10 @@
     "run_worker_first": ["/api/*", "/mcp", "/mcp/*", "/authorize", "/oauth/*", "/.well-known/*", "/login", "/login/", "/logout", "/logout/", "/me", "/me/*"]
   },
   "vars": {
-    "SITE_ORIGIN": "https://lucius7.dev",
+    "SITE_ORIGIN": "https://panel.lucius7.dev",
     "OJ_DATA_BASE": "https://ojflare.lucius7.dev/data",
     "SOLUTIONS_DATA_BASE": "https://codeflare.lucius7.dev/data",
-    "SOLUTIONS_RAW_BASE": "https://raw.githubusercontent.com/xw7qwq/codeflare/main",
+    "SOLUTIONS_RAW_BASE": "https://raw.githubusercontent.com/xw7qwq/solutions/main",
     "MACFLARE_BASE": "https://macflare.lucius7.dev",
     "BLOG_FEED": "https://blog.lucius7.cn/zh/rss.xml"
   },
@@ -28,12 +29,12 @@
   "services": [{ "binding": "MACFLARE", "service": "macflare" }],
   "kv_namespaces": [
     // 健康、记账快照和公开摘要。创建：npx wrangler kv namespace create panel
-    { "binding": "PANEL_KV", "id": "00000000000000000000000000000000" },
+    { "binding": "PANEL_KV", "id": "f337ee75d56e4a42a9290c5db68c6520" },
     // OAuth 客户端、授权和令牌（只存哈希）。创建：npx wrangler kv namespace create panel-oauth
-    { "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }
+    { "binding": "OAUTH_KV", "id": "a224763dbd8247cdba375f01e44dc5d0" }
   ],
   // 登录限速：同一 IP 每分钟最多 5 次。
   "ratelimits": [{ "name": "LOGIN_LIMITER", "namespace_id": "1701", "simple": { "limit": 5, "period": 60 } }],
-  "routes": [{ "pattern": "lucius7.dev", "custom_domain": true }]
+  "routes": [{ "pattern": "panel.lucius7.dev", "custom_domain": true }]
   // Secrets（wrangler secret put）：OWNER_PASSPHRASE、SESSION_SECRET、HEALTH_INGEST_TOKEN、LEDGER_INGEST_TOKEN。
 }
