@@ -15,10 +15,11 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page",
     // 这些路径先进 Worker：接口、MCP 和 OAuth、登录退出、需要登录的 /me/ 页面。
-    "run_worker_first": ["/api/*", "/mcp", "/mcp/*", "/authorize", "/oauth/*", "/.well-known/*", "/login", "/login/", "/logout", "/logout/", "/me", "/me/*"]
+    // Run the canonical-host redirect before public HTML and static assets too.
+    "run_worker_first": true
   },
   "vars": {
-    "SITE_ORIGIN": "https://panel.lucius7.dev",
+    "SITE_ORIGIN": "https://lucius7.dev",
     "OJ_DATA_BASE": "https://ojflare.lucius7.dev/data",
     "SOLUTIONS_DATA_BASE": "https://codeflare.lucius7.dev/data",
     "SOLUTIONS_RAW_BASE": "https://raw.githubusercontent.com/xw7qwq/solutions/main",
@@ -35,6 +36,9 @@
   ],
   // 登录限速：同一 IP 每分钟最多 5 次。
   "ratelimits": [{ "name": "LOGIN_LIMITER", "namespace_id": "1701", "simple": { "limit": 5, "period": 60 } }],
-  "routes": [{ "pattern": "panel.lucius7.dev", "custom_domain": true }]
+  "routes": [
+    { "pattern": "lucius7.dev", "custom_domain": true },
+    { "pattern": "panel.lucius7.dev", "custom_domain": true }
+  ]
   // Secrets（wrangler secret put）：OWNER_PASSPHRASE、SESSION_SECRET、HEALTH_INGEST_TOKEN、LEDGER_INGEST_TOKEN。
 }

@@ -56,7 +56,7 @@ OAuth 由 [`@cloudflare/workers-oauth-provider`](https://github.com/cloudflare/w
 
 ## 部署
 
-当前先部署到 `https://panel.lucius7.dev` 验收，两个 KV 已在 `wrangler.jsonc` 中绑定。登录口令由所有者在 Mac 的仓库目录自行运行 `npx wrangler secret put OWNER_PASSPHRASE` 输入，不进入代码或交接记录。
+正式地址为 `https://lucius7.dev`；`https://panel.lucius7.dev` 保留为同一 Worker 的入口并跳转到正式地址。两个 KV 已在 `wrangler.jsonc` 中绑定。登录口令由所有者在 Mac 的仓库目录自行运行 `npx wrangler secret put OWNER_PASSPHRASE` 输入，不进入代码或交接记录。
 
 切换正式域名前，先验证公开页、登录后的健康和记账页、OAuth/MCP 授权；随后移除根域名到博客的旧跳转，将 `SITE_ORIGIN` 改为 `https://lucius7.dev`，并把正式域名加入 `routes`。两个域名可以同时绑定同一 Worker。服务器推送 URL 与正式域名一同更新，Fava 的 Access 策略保持原样。
 
