@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "1.2.4",
-    "@xw7/ui": "link:../ui"
+    "@xw7/ui": "github:xw7qwq/ui#v0.1.0"
   },
   "devDependencies": {
     "@astrojs/svelte": "9.1.1",

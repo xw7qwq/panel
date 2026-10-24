@@ -12,8 +12,8 @@ importers:
         specifier: 1.2.4
         version: 1.2.4
       '@xw7/ui':
-        specifier: link:../ui
-        version: link:../ui
+        specifier: github:xw7qwq/ui#v0.1.0
+        version: https://codeload.github.com/xw7qwq/ui/tar.gz/223645e4675b04ba5400bc6ad73bc70afe75f61d(svelte@5.57.2)
     devDependencies:
       '@astrojs/svelte':
         specifier: 9.1.1
@@ -770,6 +770,13 @@ packages:
 
   '@ungap/structured-clone@1.4.0':
     resolution: {integrity: sha512-1mEZtMKPM09vDmQt5y7YvmN2+DFTP7Tg0EWXdic8/C6VRnpb33e4ghisCIE3WZjsE2N8mf+QV1Zqh7ZFYLWInQ==}
+
+  '@xw7/ui@https://codeload.github.com/xw7qwq/ui/tar.gz/223645e4675b04ba5400bc6ad73bc70afe75f61d':
+    resolution: {tarball: https://codeload.github.com/xw7qwq/ui/tar.gz/223645e4675b04ba5400bc6ad73bc70afe75f61d}
+    version: 0.1.0
+    engines: {node: '>=24'}
+    peerDependencies:
+      svelte: ^5.0.0
 
   acorn@8.19.0:
     resolution: {integrity: sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw==}
@@ -2200,6 +2207,10 @@ snapshots:
   '@types/unist@3.0.3': {}
 
   '@ungap/structured-clone@1.4.0': {}
+
+  '@xw7/ui@https://codeload.github.com/xw7qwq/ui/tar.gz/223645e4675b04ba5400bc6ad73bc70afe75f61d(svelte@5.57.2)':
+    dependencies:
+      svelte: 5.57.2
 
   acorn@8.19.0: {}
 
