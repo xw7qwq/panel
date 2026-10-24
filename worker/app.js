@@ -2,8 +2,9 @@ import { api } from './api.js';
 import { login, logout, readSession, safeNext } from './auth.js';
 import { authorize } from './consent.js';
 import { fail, ok, redirect, sameOrigin } from './http.js';
+import { passkeyApi } from './passkey.js';
 
-// 除 /mcp 和 OAuth 端点以外的请求都到这里：登录、同意页、/api/v1，以及需要登录的 /me/ 页面。
+// 除 /mcp 和 OAuth 端点以外的请求都到这里：登录（口令和通行密钥）、同意页、/api/v1，以及需要登录的 /me/ 页面。
 // 其余路径直接交给静态资源。
 export const app = {
   async fetch(request, env, ctx) {
@@ -12,11 +13,13 @@ export const app = {
     if (path === '/authorize') return authorize(request, env);
     if (path === '/login' || path === '/login/') {
       if (request.method === 'POST') return login(request, env);
-      if (await readSession(request, env)) return redirect(safeNext(url.searchParams.get('next')));
+      // reauth=1：已登录也要重新验证一次（管理通行密钥前）。
+      if (url.searchParams.get('reauth') !== '1' && (await readSession(request, env))) return redirect(safeNext(url.searchParams.get('next')));
       return env.ASSETS.fetch(request);
     }
     if (path === '/logout' || path === '/logout/') return logout(request);
     if (path === '/api/v1/me/grants') return grants(request, env);
+    if (/^\/api\/v1\/(auth\/|me\/passkeys(\/|$))/.test(path)) return passkeyApi(request, env);
     if (path.startsWith('/api/')) return api(request, env, ctx);
     if (path === '/me' || path.startsWith('/me/')) {
       if (!(await readSession(request, env))) return redirect(`/login/?next=${encodeURIComponent(`${path}${url.search}`)}`);

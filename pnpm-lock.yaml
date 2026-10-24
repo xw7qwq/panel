@@ -11,6 +11,9 @@ importers:
       '@cloudflare/workers-oauth-provider':
         specifier: 1.2.4
         version: 1.2.4
+      '@simplewebauthn/browser':
+        specifier: 14.0.0
+        version: 14.0.0
       '@xw7/ui':
         specifier: github:xw7qwq/ui#v0.1.0
         version: https://codeload.github.com/xw7qwq/ui/tar.gz/223645e4675b04ba5400bc6ad73bc70afe75f61d(svelte@5.57.2)
@@ -727,6 +730,9 @@ packages:
 
   '@shikijs/vscode-textmate@10.1.0':
     resolution: {integrity: sha512-cVBuhDQjBZaNMTwBquYfPydrUP+E3hE6oYGasx8h6ZrODIM7/r+gxLDXdd66oszbrggZHEntdE6j+5gYIVyMWQ==}
+
+  '@simplewebauthn/browser@14.0.0':
+    resolution: {integrity: sha512-1odWVqeEBTl7lJ9zMKLEsmTlnyrDO5iRcTvfMKKk1WThUnp/i8JJdffdj2icP+tty159s4PgwE3BiMoEW9NFow==}
 
   '@sindresorhus/is@7.2.0':
     resolution: {integrity: sha512-P1Cz1dWaFfR4IR+U13mqqiGsLFf1KbayybWwdd2vfctdV6hDpUkgCY0nKOLLTMSoRd/jJNjtbqzf13K8DCCXQw==}
@@ -2163,6 +2169,8 @@ snapshots:
       '@types/hast': 3.0.5
 
   '@shikijs/vscode-textmate@10.1.0': {}
+
+  '@simplewebauthn/browser@14.0.0': {}
 
   '@sindresorhus/is@7.2.0': {}
 

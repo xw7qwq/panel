@@ -23,7 +23,9 @@
     "SOLUTIONS_DATA_BASE": "https://codeflare.lucius7.dev/data",
     "SOLUTIONS_RAW_BASE": "https://raw.githubusercontent.com/xw7qwq/solutions/main",
     "MACFLARE_BASE": "https://macflare.lucius7.dev",
-    "BLOG_FEED": "https://blog.lucius7.cn/zh/rss.xml"
+    "BLOG_FEED": "https://blog.lucius7.cn/zh/rss.xml",
+    // 通行密钥绑定的域名。用主域名，panel. 上登记的通行密钥切到 lucius7.dev 以后照样能用。
+    "PASSKEY_RP_ID": "lucius7.dev"
   },
   // 同账户的 macflare Worker，读状态不经过公网。
   "services": [{ "binding": "MACFLARE", "service": "macflare" }],
