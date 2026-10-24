@@ -8,7 +8,9 @@ export class ApiError extends Error {
 }
 
 export async function getJson(path, { signal, login = true } = {}) {
-  const response = await fetch(path, { headers: { Accept: 'application/json' }, credentials: 'same-origin', signal });
+  // CDN browser TTL settings can exceed a live endpoint's intended refresh rate.
+  // Revalidate JSON on each read while keeping the server's edge caches useful.
+  const response = await fetch(path, { headers: { Accept: 'application/json' }, credentials: 'same-origin', cache: 'no-cache', signal });
   let body = null;
   try {
     body = await response.json();
