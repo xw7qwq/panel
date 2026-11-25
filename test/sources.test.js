@@ -19,7 +19,10 @@ test('solution paths must stay inside the repository and be source files', () =>
   assert.equal(solutionPath('AtCoder/C_-_Remove_and_Append.cpp'), 'AtCoder/C_-_Remove_and_Append.cpp');
   assert.equal(solutionPath('/Codeforces/1/A (2).cpp'), 'Codeforces/1/A (2).cpp');
   assert.equal(solutionPath('洛谷/P1001.cpp'), '洛谷/P1001.cpp');
-  for (const value of ['../secret.cpp', 'a/../../b.cpp', '.github/x.cpp', 'a/.hidden/b.cpp', 'a.exe', 'a/b', '', null, `${'a'.repeat(300)}.cpp`]) {
+  // LOJ 的题目名带全角括号，例如「一本通 5.1 例 3」。
+  assert.equal(solutionPath('LOJ/#10149._「一本通_5.1_例_3」凸多边形的划分.cpp'), 'LOJ/#10149._「一本通_5.1_例_3」凸多边形的划分.cpp');
+  assert.equal(solutionPath('LOJ/《模板》[A]{b}“c”.cpp'), 'LOJ/《模板》[A]{b}“c”.cpp');
+  for (const value of ['../secret.cpp', 'a/../../b.cpp', '.github/x.cpp', 'a/.hidden/b.cpp', 'a.exe', 'a/b', '', null, `${'a'.repeat(300)}.cpp`, 'a//b.cpp', 'a\\b.cpp', 'a?b.cpp', 'a%2e%2e/b.cpp', 'a\nb.cpp']) {
     assert.equal(solutionPath(value), null, String(value));
   }
   assert.equal(solutionRawUrl({ SOLUTIONS_RAW_BASE: 'https://raw.example/x/main' }, 'A B/c#1.cpp'), 'https://raw.example/x/main/A%20B/c%231.cpp');

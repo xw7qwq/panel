@@ -93,7 +93,9 @@ export function readHealthPublic(env) {
 
 // ---- 题解 ----
 
-const SOLUTION_FILE = /^[\p{L}\p{N} _.,+()[\]'!&@#=~-]+(?:\/[\p{L}\p{N} _.,+()[\]'!&@#=~-]+)*\.(?:cpp|cc|cxx|c|h|hpp|py|java|rs|go|kt|js|ts|txt|md)$/u;
+// 文件名里允许文字、数字、成对的括号和引号（含「」这类全角的，LOJ 的题目名常带）以及少量常见符号。
+const SOLUTION_NAME = String.raw`[\p{L}\p{N}\p{M}\p{Ps}\p{Pe}\p{Pi}\p{Pf} _.,+'!&@#=~-]+`;
+const SOLUTION_FILE = new RegExp(String.raw`^${SOLUTION_NAME}(?:/${SOLUTION_NAME})*\.(?:cpp|cc|cxx|c|h|hpp|py|java|rs|go|kt|js|ts|txt|md)$`, 'u');
 
 // 只允许读题解仓库里的源码文件，防止被当成任意代理。
 export function solutionPath(value) {
