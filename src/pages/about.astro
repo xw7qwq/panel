@@ -4,7 +4,7 @@ import { ROUTES } from '../../worker/api.js';
 import { TOOLS } from '../../worker/tools.js';
 
 // 接口和 MCP 工具列表直接取自 Worker 的定义，文档不会和实现对不上。
-const origin = Astro.site?.origin ?? 'https://lucius7.dev';
+const origin = Astro.site?.origin ?? 'https://panel.lucius7.dev';
 const routes = ROUTES.filter((route) => route.public);
 const privateRoutes = ROUTES.filter((route) => !route.public);
 const SOURCES = [
