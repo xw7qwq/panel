@@ -1,6 +1,6 @@
 // 上游数据。刷题和题解是 GitHub Pages 上的公开 JSON，状态来自 macflare，
 // 健康和记账由服务器定时推送进 KV（见 ingest.js），面板从不直接连自有服务器。
-const USER_AGENT = 'xw7-panel/0.1 (+https://lucius7.dev)';
+const USER_AGENT = 'xw7-panel/0.1 (+https://panel.lucius7.dev)';
 
 export class UpstreamError extends Error {
   constructor(source, status, message = `${source} 返回 ${status}`) {

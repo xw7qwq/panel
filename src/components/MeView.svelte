@@ -15,7 +15,7 @@
   let error = $state('');
   let grants = $state.raw(null);
   let grantsError = $state('');
-  let origin = $state('https://lucius7.dev');
+  let origin = $state('https://panel.lucius7.dev');
   let copied = $state(false);
   let now = $state(Date.now());
   let passkeys = $state.raw(null);

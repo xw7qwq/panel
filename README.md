@@ -1,8 +1,8 @@
 # panel
 
-xw7 的面板，部署在 [lucius7.dev](https://lucius7.dev/)：刷题、题解、Mac 此刻的状态、健康和记账放在一处，附带统一的只读接口和给 AI 用的 MCP。文章在[博客](https://blog.lucius7.cn/)。
+xw7 的面板，部署在 [panel.lucius7.dev](https://panel.lucius7.dev/)：刷题、题解、Mac 此刻的状态、健康和记账放在一处，附带统一的只读接口和给 AI 用的 MCP。文章在[博客](https://blog.lucius7.cn/)。
 
-[面板](https://lucius7.dev/) · [博客](https://blog.lucius7.cn/) · [接口说明](https://lucius7.dev/about/) · [组织](https://github.com/xw7qwq)
+[面板](https://panel.lucius7.dev/) · [博客](https://blog.lucius7.cn/) · [接口说明](https://panel.lucius7.dev/about/) · [组织](https://github.com/xw7qwq)
 
 ## 栏目
 
@@ -36,17 +36,17 @@ xw7 的面板，部署在 [lucius7.dev](https://lucius7.dev/)：刷题、题解�
 
 ## 接口
 
-公开接口在 `/api/v1`，只支持 GET，允许跨域读取。成功时返回 `{ data, updated_at, source }`，出错时返回 `{ error: { code, message } }`。完整列表见 [/about/](https://lucius7.dev/about/) 或 `GET /api/v1`。
+公开接口在 `/api/v1`，只支持 GET，允许跨域读取。成功时返回 `{ data, updated_at, source }`，出错时返回 `{ error: { code, message } }`。完整列表见 [/about/](https://panel.lucius7.dev/about/) 或 `GET /api/v1`。
 
 ```sh
-curl -s https://lucius7.dev/api/v1/summary
+curl -s https://panel.lucius7.dev/api/v1/summary
 ```
 
 `/api/v1/me/*` 需要登录，从不缓存，也不带 CORS 头。
 
 ## MCP
 
-地址是 `https://lucius7.dev/mcp`（Streamable HTTP，无状态，只返回 JSON）。在 Claude 等应用里添加自定义连接器，第一次连接会跳到面板登录，确认后授权 30 天。13 个工具全部只读：总览、刷题统计和每日题数、最近通过、题解搜索和源码、Mac 状态、健康指标和序列、收支概况、按月收支、余额、交易。授权可以在 `/me/` 页面撤销。
+地址是 `https://panel.lucius7.dev/mcp`（Streamable HTTP，无状态，只返回 JSON）。在 Claude 等应用里添加自定义连接器，第一次连接会跳到面板登录，确认后授权 30 天。13 个工具全部只读：总览、刷题统计和每日题数、最近通过、题解搜索和源码、Mac 状态、健康指标和序列、收支概况、按月收支、余额、交易。授权可以在 `/me/` 页面撤销。
 
 OAuth 由 [`@cloudflare/workers-oauth-provider`](https://github.com/cloudflare/workers-oauth-provider) 处理，支持动态注册和客户端元数据文档（CIMD），令牌只存哈希。
 
@@ -54,7 +54,7 @@ OAuth 由 [`@cloudflare/workers-oauth-provider`](https://github.com/cloudflare/w
 
 有两种方式，通过后都发同一张 HMAC 签名的 `__Host-` Cookie，30 天有效；换掉 `SESSION_SECRET` 会让所有设备立即退出。登录按 IP 限速，每分钟 5 次。
 
-- **通行密钥（passkey）**：在 `/me/` 添加。之后在登录页点「使用通行密钥登录」，或者在口令框的自动填充里选它，用指纹、面容或设备密码确认。通行密钥绑定 `PASSKEY_RP_ID`（`lucius7.dev`），所以在 `panel.lucius7.dev` 添加的通行密钥切到主域名后照样能用。
+- **通行密钥（passkey）**：在 `/me/` 添加。之后在登录页点「使用通行密钥登录」，或者在口令框的自动填充里选它，用指纹、面容或设备密码确认。通行密钥绑定 `PASSKEY_RP_ID`（`lucius7.dev`），所以面板以后换到根域名，现在添加的通行密钥照样能用。
 - **口令**（`OWNER_PASSPHRASE`）：第一次添加通行密钥要先用它登录，之后留作备用。只想用通行密钥时运行 `npx wrangler secret delete OWNER_PASSPHRASE`；通行密钥全丢了，再用 `npx wrangler secret put OWNER_PASSPHRASE` 设回来。
 
 添加或删除通行密钥要求最近 15 分钟内登录过，否则先到 `/login/?reauth=1` 重新验证一次；口令关闭时，最后一把通行密钥不能删。
@@ -63,9 +63,16 @@ OAuth 由 [`@cloudflare/workers-oauth-provider`](https://github.com/cloudflare/w
 
 ## 部署
 
-当前先部署到 `https://panel.lucius7.dev` 验收，两个 KV 已在 `wrangler.jsonc` 中绑定。登录口令由所有者在 Mac 的仓库目录自行运行 `npx wrangler secret put OWNER_PASSPHRASE` 输入，不进入代码或交接记录。
+面板的地址是 `https://panel.lucius7.dev`。它写在两处：`wrangler.jsonc` 的 `SITE_ORIGIN`（Worker 用它签发 OAuth、校验通行密钥，其他域名进来的请求一律跳到这个地址）和 `astro.config.mjs` 的 `site`（页面的 canonical 和接口说明里的地址）。两个 KV 已在 `wrangler.jsonc` 中绑定。登录口令由所有者在 Mac 的仓库目录自行运行 `npx wrangler secret put OWNER_PASSPHRASE` 输入，不进入代码或交接记录。
 
-切换正式域名前，先验证公开页、登录后的健康和记账页、OAuth/MCP 授权；随后移除根域名到博客的旧跳转，将 `SITE_ORIGIN` 改为 `https://lucius7.dev`，并把正式域名加入 `routes`。两个域名可以同时绑定同一 Worker。服务器推送 URL 与正式域名一同更新，Fava 的 Access 策略保持原样。
+根域名 `lucius7.dev` 目前跳转到博客，这条跳转规则在 Cloudflare 里。要把面板换到根域名：
+
+1. 在 Cloudflare 删掉根域名到博客的跳转规则。
+2. 把 `SITE_ORIGIN` 和 `site` 改为 `https://lucius7.dev`，在 `routes` 里加上 `lucius7.dev`。`panel.lucius7.dev` 留在 `routes` 里，它会自动跳到新地址，旧链接不会失效。
+3. 部署，然后把服务器上 health 和 ledger 的推送地址改到新域名（推送是 POST，不能靠跳转）。
+4. 把 [ui](https://github.com/xw7qwq/ui) 的 `SITES.panel` 改成新地址并发版。
+
+换地址后 MCP 连接器要重新授权一次。Fava 的 Access 策略不受影响。
 
 第一次部署：
 
