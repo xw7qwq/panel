@@ -68,7 +68,7 @@ OAuth 由 [`@cloudflare/workers-oauth-provider`](https://github.com/cloudflare/w
 根域名 `lucius7.dev` 目前跳转到博客，这条跳转规则在 Cloudflare 里。要把面板换到根域名：
 
 1. 在 Cloudflare 删掉根域名到博客的跳转规则。
-2. 把 `SITE_ORIGIN` 和 `site` 改为 `https://lucius7.dev`，在 `routes` 里加上 `lucius7.dev`。`panel.lucius7.dev` 留在 `routes` 里，它会自动跳到新地址，旧链接不会失效。
+2. 把 `SITE_ORIGIN` 和 `site` 改为 `https://lucius7.dev`，在 `routes` 里加上 `lucius7.dev`，并把 `assets.run_worker_first` 改为 `true`。`panel.lucius7.dev` 留在 `routes` 里：Worker 会把它的请求跳到新地址，旧链接不会失效。`run_worker_first` 不改的话，旧域名上的静态页面不经过 Worker，页面还留在旧域名，接口请求却被跳到新域名，会被浏览器拦下。
 3. 部署，然后把服务器上 health 和 ledger 的推送地址改到新域名（推送是 POST，不能靠跳转）。
 4. 把 [ui](https://github.com/xw7qwq/ui) 的 `SITES.panel` 改成新地址并发版。
 
