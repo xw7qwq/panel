@@ -288,7 +288,7 @@
       </p>
     </Card>
 
-    <div class="profiles">
+    <div class="profiles" class:single={profiles.length === 1}>
       {#each profiles as profile (profile.id)}
         <div class="profile">
           <PlatformTag platform={profile.id} short />
@@ -383,6 +383,11 @@
           <option value="completed">已全部完成</option>
           <option value="unfinished">还有没做完的</option>
         </select>
+        <ul class="legend" aria-label="题目颜色">
+          <li><span class="swatch solved"></span>已 AC</li>
+          <li><span class="swatch attempted"></span>尝试过</li>
+          <li><span class="swatch unseen"></span>未完成</li>
+        </ul>
       </div>
       {#if !matrix.rows.length}
         <p class="empty">没有符合条件的比赛，试试其他平台、类别，或清空搜索。</p>
@@ -467,10 +472,22 @@
     font-size: var(--text-xs);
   }
 
+  /* 两列放得下「题数 · 段位」和「Rating · 最高」各一行；四列时文字会折成三行。 */
   .profiles {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
+  }
+
+  .profiles.single,
+  .profile:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 640px) {
+    .profiles {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .profile {
@@ -518,8 +535,13 @@
     gap: var(--space-1);
   }
 
+  .days .xw7-button {
+    flex: none;
+  }
+
   .date {
     width: auto;
+    min-width: 0;
   }
 
   .clock {
@@ -559,9 +581,24 @@
     font-weight: 600;
   }
 
+  /* 横向滚动时比赛名留在左边，知道这一行是哪场。 */
   .matrix .contest {
+    position: sticky;
+    left: 0;
+    z-index: 1;
     width: 220px;
+    background: var(--surface);
     font-weight: 400;
+  }
+
+  @media (max-width: 640px) {
+    .matrix {
+      min-width: calc(150px + var(--columns) * 110px);
+    }
+
+    .matrix .contest {
+      width: 150px;
+    }
   }
 
   .matrix .contest a {
@@ -599,6 +636,42 @@
   }
 
   .task.unseen {
+    background: var(--surface-2);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin: 0 0 0 auto;
+    padding: 0;
+    color: var(--text-3);
+    font-size: var(--text-xs);
+    list-style: none;
+  }
+
+  .legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .swatch.solved {
+    background: var(--good);
+  }
+
+  .swatch.attempted {
+    background: var(--warn);
+  }
+
+  .swatch.unseen {
+    border: 1px solid var(--border-strong);
     background: var(--surface-2);
   }
 
