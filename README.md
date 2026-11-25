@@ -100,6 +100,8 @@ pnpm preview    # 构建后用 wrangler dev 跑完整的 Worker
 
 `pnpm preview` 需要在仓库根目录放一个 `.dev.vars`（已被 git 忽略），写上四个 secret 的本地值。本地试通行密钥时再加上 `SITE_ORIGIN=http://localhost:8787` 和 `PASSKEY_RP_ID=localhost`。
 
+`pnpm preview` 给 `wrangler dev` 加了 `--local-upstream localhost:8787`。不加的话，本地 Worker 看到的请求域名是 `routes` 里的 `panel.lucius7.dev`、协议却是 http，和 `SITE_ORIGIN` 对不上，所有接口都会跳转到自己，页面读不到数据。
+
 ## 目录结构
 
 ```text
