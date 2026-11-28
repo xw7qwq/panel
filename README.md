@@ -102,6 +102,29 @@ pnpm preview    # 构建后用 wrangler dev 跑完整的 Worker
 
 `pnpm preview` 给 `wrangler dev` 加了 `--local-upstream localhost:8787`。不加的话，本地 Worker 看到的请求域名是 `routes` 里的 `panel.lucius7.dev`、协议却是 http，和 `SITE_ORIGIN` 对不上，所有接口都会跳转到自己，页面读不到数据。
 
+## Notion 中转站
+
+[Notion relay 工作流](.github/workflows/notion.yml)每 6 小时把 xw7qwq 组织的每个仓库同步到 Notion「xw7qwq 项目中转站」里的「仓库」数据库，给自己和 AI 读。脚本在 `scripts/notion-sync.mjs`，只用 Node 自带的 `fetch`，不装依赖。
+
+| 设置 | GitHub Actions 里的位置 | 说明 |
+| --- | --- | --- |
+| `NOTION_TOKEN` | 仓库 secret | Notion 内部集成的密钥，需要读取、更新、插入内容的权限。没有它时工作流什么也不做 |
+| `NOTION_DATABASE_ID` | 仓库变量，可不设 | 「仓库」数据库的 ID，默认是现在那一个 |
+
+设置步骤：
+
+1. 在 [notion.so/profile/integrations](https://www.notion.so/profile/integrations) 新建一个内部集成，把密钥存为 `NOTION_TOKEN`。
+2. 在 Notion 打开「xw7qwq 项目中转站」页面，**⋯ → 连接**里加上这个集成（子页面和数据库会一起授权）。
+3. 在 Actions 里手动运行一次 **Notion relay**。第一次会给每个仓库建文档子页面，几分钟；之后只在仓库有新提交时重建。
+
+同步规则：
+
+- 按「同步 ID」（`owner/repo`）认行。只改写「最近推送」「最近提交」「开放 PR」「同步时间」，仓库归档时把「状态」改成停用；其余列归你。组织里新出现的仓库会自动加一行。
+- 行页面正文里，只改写「仓库文档（自动同步）」和「我的笔记」两个标题之间的状态说明，其余正文不动。
+- 文档全文放在行页面下标题以「文档 · 」开头的子页面里，默认分支有新提交时整页重建（先建新的再归档旧的）。镜像哪些文件写在 `scripts/notion/sync.mjs` 的 `DOCS` 里，没列出的仓库只镜像 README。
+- 私有仓库只同步元数据，从不读文件内容。从不删除行。
+- 运行时带上 `force` 会重建全部文档页，带上 `dry_run` 只打印要做的事。
+
 ## 目录结构
 
 ```text
@@ -121,7 +144,8 @@ worker/
   webauthn.js   WebAuthn 校验
   consent.js  ingest.js  sources.js
   health.js  ledger.js  oj.js  http.js
-test/           Worker 的单元测试（node --test）
+scripts/        Notion 中转站的同步脚本
+test/           Worker 和同步脚本的单元测试（node --test）
 public/         favicon、robots.txt、安全响应头
 ```
 

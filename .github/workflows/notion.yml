@@ -1,0 +1,50 @@
+name: Notion relay
+
+# 把 xw7qwq 组织的仓库信息和文档镜像到 Notion「xw7qwq 项目中转站」的「仓库」数据库。
+# 没有 NOTION_TOKEN 时什么也不做。说明见 README 的「Notion 中转站」。
+
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Rebuild every document page even if the repository has no new commit'
+        required: false
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Report what would change without writing to Notion'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  # 一次只跑一个，避免两次运行建出重复的行。
+  group: notion-relay
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      - name: Mirror repositories to Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ vars.NOTION_DATABASE_ID || '4261816621d8817e9bd9ee5896c660d2' }}
+          GITHUB_TOKEN: ${{ github.token }}
+          FORCE: ${{ inputs.force }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: node scripts/notion-sync.mjs
